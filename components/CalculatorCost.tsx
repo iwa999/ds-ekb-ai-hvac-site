@@ -3,9 +3,10 @@
 import { useState } from 'react';
 
 export default function CalculatorCost() {
-  const [service, setService] = useState('ventilation');
-  const [object, setObject] = useState('flat');
-  const [urgency, setUrgency] = useState('normal');
+  // состояния формы
+  const [service, setService] = useState<'ventilation' | 'conditioning' | 'refrigeration'>('ventilation');
+  const [object, setObject] = useState<'flat' | 'office' | 'warehouse'>('flat');
+  const [urgency, setUrgency] = useState<'normal' | 'fast' | 'emergency'>('normal');
   const [sqm, setSqm] = useState('');
   const [price, setPrice] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
@@ -27,18 +28,45 @@ export default function CalculatorCost() {
     setLoading(false);
   }
 
+  // русские label'ы для отправки в CRM/почту
+  const serviceLabel =
+    service === 'ventilation'
+      ? 'Вентиляция'
+      : service === 'conditioning'
+      ? 'Кондиционер'
+      : 'Холод';
+  const objectLabel =
+    object === 'flat' ? 'Квартира' : object === 'office' ? 'Офис' : 'Склад';
+  const urgencyLabel =
+    urgency === 'normal' ? 'Обычная' : urgency === 'fast' ? 'Срочная' : 'Аварийная';
+
+  async function sendLead() {
+    await fetch('/api/amocrm-lead', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        calc: {
+          serviceLabel,
+          objectLabel,
+          urgencyLabel,
+          sqm: Number(sqm),
+          price,
+        },
+      }),
+    });
+    alert('Заявка отправлена!');
+  }
+
   return (
     <section className="bg-gray-100 text-gray-900 py-12 px-4">
-      <h2 className="text-3xl font-bold text-center mb-6">
-        Калькулятор стоимости
-      </h2>
+      <h2 className="text-3xl font-bold text-center mb-6">Калькулятор стоимости</h2>
 
       <div className="max-w-xl mx-auto grid gap-4">
         {/* Тип услуги */}
         <select
           className="p-3 rounded-lg"
           value={service}
-          onChange={(e) => setService(e.target.value)}
+          onChange={(e) => setService(e.target.value as any)}
         >
           <option value="ventilation">Вентиляция</option>
           <option value="conditioning">Кондиционер</option>
@@ -49,7 +77,7 @@ export default function CalculatorCost() {
         <select
           className="p-3 rounded-lg"
           value={object}
-          onChange={(e) => setObject(e.target.value)}
+          onChange={(e) => setObject(e.target.value as any)}
         >
           <option value="flat">Квартира</option>
           <option value="office">Офис</option>
@@ -60,11 +88,11 @@ export default function CalculatorCost() {
         <select
           className="p-3 rounded-lg"
           value={urgency}
-          onChange={(e) => setUrgency(e.target.value)}
+          onChange={(e) => setUrgency(e.target.value as any)}
         >
           <option value="normal">Обычная</option>
-          <option value="fast">Срочно</option>
-          <option value="emergency">Авария</option>
+          <option value="fast">Срочная</option>
+          <option value="emergency">Аварийная</option>
         </select>
 
         {/* Площадь */}
@@ -95,22 +123,7 @@ export default function CalculatorCost() {
             </div>
 
             <button
-              onClick={async () => {
-                await fetch('/api/amocrm-lead', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    calc: {
-                      service,
-                      object,
-                      urgency,
-                      sqm: Number(sqm),
-                      price,
-                    },
-                  }),
-                });
-                alert('Заявка отправлена!');
-              }}
+              onClick={sendLead}
               className="bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition"
             >
               Оформить заявку
