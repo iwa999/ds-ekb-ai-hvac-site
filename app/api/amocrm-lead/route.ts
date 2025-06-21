@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
     import nodemailer from 'nodemailer';
 
-    export const runtime = 'edge';
+    export const runtime = 'nodejs';
 
     export async function POST(req: NextRequest) {
       const { problem, aiAnswer } = await req.json();
