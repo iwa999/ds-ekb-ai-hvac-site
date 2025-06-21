@@ -2,8 +2,8 @@ import { NextRequest } from 'next/server';
 
 /**
  * Базовый URL берём из переменной окружения.
- * Для ProxyAPI это https://api.proxyapi.ru/openai/v1
- * Если переменная не задана — падаем на прямой openai.com.
+ * Для ProxyAPI: https://api.proxyapi.ru/openai/v1
+ * Если переменная не задана — используем прямой openai.com.
  */
 const BASE = process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1';
 
@@ -16,12 +16,11 @@ export async function POST(req: NextRequest) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      // если ProxyAPI вместо Bearer требует x-api-key:
-      // 'x-api-key': process.env.OPENAI_API_KEY,
+      // ProxyAPI принимает ключ в заголовке x-api-key
+      'x-api-key': process.env.OPENAI_API_KEY as string,
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',          // при 404 заменим на gpt-3.5-turbo
+      model: 'gpt-4o-mini',           // если ProxyAPI не поддержит — заменим позже
       messages: [
         {
           role: 'system',
@@ -34,16 +33,13 @@ export async function POST(req: NextRequest) {
     }),
   });
 
-  // ЛОГИРУЕМ статус ProxyAPI — увидите его в Railway → Logs
+  // Логируем статус, чтобы видеть в Railway-логах
   console.error('ProxyAPI status', resp.status);
 
   if (!resp.ok) {
     return new Response(
       JSON.stringify({ answer: 'Ошибка AI-сервиса' }),
-      {
-        status: 502,
-        headers: { 'Content-Type': 'application/json' },
-      },
+      { status: 502, headers: { 'Content-Type': 'application/json' } },
     );
   }
 
@@ -51,7 +47,8 @@ export async function POST(req: NextRequest) {
   const answer =
     data?.choices?.[0]?.message?.content || 'Ошибка AI-сервиса';
 
-  return new Response(JSON.stringify({ answer }), {
-    headers: { 'Content-Type': 'application/json' },
-  });
+  return new Response(
+    JSON.stringify({ answer }),
+    { headers: { 'Content-Type': 'application/json' } },
+  );
 }
