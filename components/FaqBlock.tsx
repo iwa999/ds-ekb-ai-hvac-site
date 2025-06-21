@@ -14,7 +14,7 @@ export default function FaqBlock() {
 
   /* --- грузим FAQ --- */
   useEffect(() => {
-    fetch('/api/faq-index')          {/* ← было /faq.json */}
+    fetch('/api/faq-index') // раньше было /faq.json
       .then((r) => r.json())
       .then((d) => setFaq(d as QA[]))
       .catch(console.error);
@@ -33,7 +33,7 @@ export default function FaqBlock() {
       });
       const data = await r.json();
       setCustomA(data.answer);
-    } catch (e) {
+    } catch {
       setCustomA('Ошибка сервиса FAQ.');
     } finally {
       setLoading(false);
@@ -56,7 +56,9 @@ export default function FaqBlock() {
               <span className="text-2xl">{open === idx ? '−' : '+'}</span>
             </button>
             {open === idx && (
-              <p className="mt-2 text-gray-700 whitespace-pre-line">{item.a}</p>
+              <p className="mt-2 text-gray-700 whitespace-pre-line">
+                {item.a}
+              </p>
             )}
           </div>
         ))}
