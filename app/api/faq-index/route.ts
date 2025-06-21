@@ -6,30 +6,43 @@ export const runtime = 'nodejs';
 
 let cached: any = null;
 
+/**
+ * GET /api/faq-index
+ * Отдаёт массив [{ q, a }] — многострочные ответы поддержаны.
+ */
 export async function GET() {
   if (cached) {
     return new Response(JSON.stringify(cached), {
-      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public,max-age=3600' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public,max-age=3600',
+      },
     });
   }
 
-  // __dirname эквивалент для ES-модулей
+  /* --- читаем markdown --- */
   const __filename = fileURLToPath(import.meta.url);
-  const __dirname  = path.dirname(__filename);
-
-  // markdown лежит на один уровень выше (../../../data/faq.md)
+  const __dirname = path.dirname(__filename);
   const mdPath = path.join(__dirname, '../../../data/faq.md');
   const md = await fs.readFile(mdPath, 'utf8');
 
-  const arr = md
-    .split('\n')
-    .filter((l) => l.startsWith('##'))
-    .map((_, i, a) => a.slice(i, i + 2))
-    .filter((p) => p.length === 2)
-    .map(([q, a]) => ({
-      q: q.replace(/^##\s*/, '').trim(),
-      a: a.trim(),
-    }));
+  /* --- парсим: каждая пара “## вопрос / ответ (до следующего ##)” --- */
+  const lines = md.split('\n');
+  const arr: { q: string; a: string }[] = [];
+
+  let curQ = '';
+  let buf: string[] = [];
+
+  for (const line of lines) {
+    if (line.startsWith('## ')) {
+      if (curQ) arr.push({ q: curQ, a: buf.join('\n').trim() });
+      curQ = line.replace(/^##\s*/, '').trim();
+      buf = [];
+    } else {
+      buf.push(line);
+    }
+  }
+  if (curQ) arr.push({ q: curQ, a: buf.join('\n').trim() });
 
   cached = arr;
 
