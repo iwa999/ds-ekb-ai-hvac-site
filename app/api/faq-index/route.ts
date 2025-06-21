@@ -1,14 +1,21 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs'; // ← было edge
 
 let cached: any = null;
 
+/**
+ * GET /api/faq-index
+ * Возвращает JSON-массив [{ q, a }]
+ */
 export async function GET() {
   if (cached) {
     return new Response(JSON.stringify(cached), {
-      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=3600' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=3600',
+      },
     });
   }
 
