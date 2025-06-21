@@ -1,12 +1,12 @@
 import { NextRequest } from 'next/server';
 import nodemailer from 'nodemailer';
 
-export const runtime = 'nodejs';
+export const runtime = 'nodejs'; // нужен Node для nodemailer
 
 export async function POST(req: NextRequest) {
   const { problem, aiAnswer } = await req.json();
 
-  /* ---------- AmoCRM ---------- */
+  /* ─────── AmoCRM ─────── */
   const amoRes = await fetch(
     `https://${process.env.AMO_SUBDOMAIN}.amocrm.ru/api/v4/leads/complex`,
     {
@@ -17,18 +17,19 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify([
         {
-          name: `HVAC AI Lead — ${new Date().toISOString()}`,
+          name: `HVAC AI Lead — ${new Date().toLocaleString()}`,
+          price: 0,
           note: `Проблема: ${problem}\nAI: ${aiAnswer}`,
-          // custom_fields_values добавим позже, когда будут field_id
+          _embedded: { contacts: [] },
         },
       ]),
     },
   );
 
-  const amoText = await amoRes.text();
-  console.error('AMO status', amoRes.status, amoText); // ← оставляем лог
+  const amoBody = await amoRes.text();
+  console.error('AMO status', amoRes.status, amoBody); // ← смотрим код в логах
 
-  /* ---------- Email ---------- */
+  /* ─────── SMTP письмо ─────── */
   let mailOk = false;
   try {
     const transporter = nodemailer.createTransport({
