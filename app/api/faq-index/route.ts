@@ -1,28 +1,25 @@
 import { promises as fs } from 'fs';
+import { fileURLToPath } from 'url';
 import path from 'path';
 
-export const runtime = 'nodejs'; // ← было edge
+export const runtime = 'nodejs';
 
 let cached: any = null;
 
-/**
- * GET /api/faq-index
- * Возвращает JSON-массив [{ q, a }]
- */
 export async function GET() {
   if (cached) {
     return new Response(JSON.stringify(cached), {
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'public, max-age=3600',
-      },
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public,max-age=3600' },
     });
   }
 
-  const md = await fs.readFile(
-    path.join(process.cwd(), 'data/faq.md'),
-    'utf8',
-  );
+  // __dirname эквивалент для ES-модулей
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname  = path.dirname(__filename);
+
+  // markdown лежит на один уровень выше (../../../data/faq.md)
+  const mdPath = path.join(__dirname, '../../../data/faq.md');
+  const md = await fs.readFile(mdPath, 'utf8');
 
   const arr = md
     .split('\n')
