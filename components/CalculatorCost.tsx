@@ -86,34 +86,38 @@ export default function CalculatorCost() {
         </button>
 
         {price !== null && (
-  <div className="bg-white p-6 rounded-lg shadow text-center mt-4 grid gap-4">
-    <div>
-      <p className="text-xl">Итого:</p>
-      <p className="text-4xl font-bold">
-        {price.toLocaleString('ru-RU')} ₽
-      </p>
-    </div>
+          <div className="bg-white p-6 rounded-lg shadow text-center mt-4 grid gap-4">
+            <div>
+              <p className="text-xl">Итого:</p>
+              <p className="text-4xl font-bold">
+                {price.toLocaleString('ru-RU')} ₽
+              </p>
+            </div>
 
-    <button
-      onClick={async () => {
-        await fetch('/api/amocrm-lead', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            calc: {
-              service,
-              object,
-              urgency,
-              sqm: Number(sqm),
-              price,
-            },
-          }),
-        });
-        alert('Заявка отправлена!');
-      }}
-      className="bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition"
-    >
-      Оформить заявку
-    </button>
-  </div>
-)}
+            <button
+              onClick={async () => {
+                await fetch('/api/amocrm-lead', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    calc: {
+                      service,
+                      object,
+                      urgency,
+                      sqm: Number(sqm),
+                      price,
+                    },
+                  }),
+                });
+                alert('Заявка отправлена!');
+              }}
+              className="bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition"
+            >
+              Оформить заявку
+            </button>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
