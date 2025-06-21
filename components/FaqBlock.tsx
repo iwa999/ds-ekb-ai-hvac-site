@@ -2,40 +2,38 @@
 
 import { useEffect, useState } from 'react';
 
-// тип для данных FAQ, которые подгрузим с бекенда
 type QA = { q: string; a: string };
 
 export default function FaqBlock() {
   const [faq, setFaq] = useState<QA[]>([]);
   const [open, setOpen] = useState<number | null>(null);
 
-  // поле «свой вопрос»
   const [customQ, setCustomQ] = useState('');
   const [customA, setCustomA] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // 1. Загружаем FAQ (берём из markdown через крошечный json-файл, чтобы не тащить md в браузер)
+  /* --- грузим FAQ --- */
   useEffect(() => {
-    fetch('/faq.json')
+    fetch('/api/faq-index')          {/* ← было /faq.json */}
       .then((r) => r.json())
-      .then((data) => setFaq(data as QA[]))
+      .then((d) => setFaq(d as QA[]))
       .catch(console.error);
   }, []);
 
-  // 2. Отправка произвольного вопроса
-  async function askCustom() {
+  /* --- задать произвольный вопрос --- */
+  async function ask() {
     if (!customQ.trim()) return;
     setLoading(true);
     setCustomA(null);
     try {
-      const res = await fetch('/api/faq', {
+      const r = await fetch('/api/faq', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: customQ }),
       });
-      const data = await res.json();
+      const data = await r.json();
       setCustomA(data.answer);
-    } catch (err) {
+    } catch (e) {
       setCustomA('Ошибка сервиса FAQ.');
     } finally {
       setLoading(false);
@@ -46,13 +44,13 @@ export default function FaqBlock() {
     <section className="py-12 px-4 bg-white">
       <h2 className="text-3xl font-bold text-center mb-8">Частые вопросы</h2>
 
-      {/* --- Accordion --- */}
+      {/* Accordion */}
       <div className="max-w-3xl mx-auto divide-y divide-gray-300">
         {faq.map((item, idx) => (
           <div key={idx} className="py-3">
             <button
               onClick={() => setOpen(open === idx ? null : idx)}
-              className="w-full text-left font-semibold flex justify-between items-center"
+              className="w-full text-left font-semibold flex justify-between"
             >
               <span>{item.q}</span>
               <span className="text-2xl">{open === idx ? '−' : '+'}</span>
@@ -64,7 +62,7 @@ export default function FaqBlock() {
         ))}
       </div>
 
-      {/* --- Свой вопрос --- */}
+      {/* Свой вопрос */}
       <div className="max-w-3xl mx-auto mt-10 grid gap-4">
         <h3 className="text-2xl font-semibold">Не нашли ответа?</h3>
         <textarea
@@ -75,7 +73,7 @@ export default function FaqBlock() {
           onChange={(e) => setCustomQ(e.target.value)}
         />
         <button
-          onClick={askCustom}
+          onClick={ask}
           disabled={loading}
           className="bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
         >
