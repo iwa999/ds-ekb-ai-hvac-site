@@ -1,20 +1,31 @@
-import './globals.css';
-import type { Metadata } from 'next';
-import { ReactNode } from 'react';
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 
+import "@/app/globals.css";
+import LiveTicker from "@/components/LiveTicker";   // ← social-proof
+
+/* ----- шрифт ----- */
+const inter = Inter({ subsets: ["latin", "cyrillic"], display: "swap" });
+
+/* ----- SEO ----- */
 export const metadata: Metadata = {
-  title: 'DS EKB AI HVAC',
-  description: 'AI HVAC диагностика за 2 минуты',
+  title: "DS EKB AI HVAC",
+  description: "Автоматизация HVAC-заявок с ИИ-диагностикой",
 };
 
 export default function RootLayout({
   children,
 }: {
-  children: ReactNode;
+  children: React.ReactNode;
 }) {
   return (
     <html lang="ru">
-      <body>{children}</body>
+      <body className={inter.className}>
+        {children}
+
+        {/* Live-статистика (Social Proof) */}
+        <LiveTicker />
+      </body>
     </html>
   );
 }
