@@ -13,7 +13,8 @@ export async function GET() {
   ]);
 
   return NextResponse.json({
-    latest: latest.map(JSON.parse),                          // превращаем строки в объекты
+    -    latest: latest.map(JSON.parse),
++    latest: latest.map((s) => JSON.parse(s)),                          // превращаем строки в объекты
     count24h,
   });
 }
