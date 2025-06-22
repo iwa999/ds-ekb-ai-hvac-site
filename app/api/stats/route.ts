@@ -8,7 +8,7 @@ export async function GET() {
 
   // параллельные запросы в Redis
   const [latest, count24h] = await Promise.all([
-    redis.lrange<string[]>("leads", 0, 19),                  // 20 последних лидов
+    redis.lrange<string>("leads", 0, 19),                  // 20 последних лидов
     redis.zcount("hits24h", now - DAY_MS, "+inf"),           // общее за 24 часа
   ]);
 
