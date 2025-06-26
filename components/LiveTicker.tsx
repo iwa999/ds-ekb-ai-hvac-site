@@ -1,5 +1,4 @@
 "use client";
-import React from "react";          // ← добавь, если VS Code подсвечивает React not defined
 import useSWR from "swr";
 
 const fetcher = (url: string) => fetch(url).then(r => r.json());
@@ -11,14 +10,12 @@ export default function LiveTicker() {
   return (
     <div className="fixed bottom-4 left-4 bg-white text-gray-900 rounded-xl shadow-lg p-4 w-72 z-50">
       <p className="text-sm font-semibold mb-1">
-        {data.count24h} заявок за 24 часа
+        {data.count24h} заявок за 24 ч
       </p>
 
       <ul className="h-16 overflow-hidden animate-marquee space-y-1 text-xs leading-tight">
         {data.latest.map((l: any, i: number) => (
-          <li key={i}>
-            {l.service} для {l.name ?? "клиент"}
-          </li>
+          <li key={i}>{l.service} для {l.name ?? "клиент"}</li>
         ))}
       </ul>
     </div>
