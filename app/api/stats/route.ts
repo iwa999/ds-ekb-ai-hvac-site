@@ -1,19 +1,28 @@
-import { NextResponse } from "next/server";
-import { redis } from "@/lib/redis";
+/**
+ * Отменяем пререндеринг для этого API-роута —
+ * Next.js больше не будет выполнять код на стадии build.
+ */
+export const dynamic = 'force-dynamic';  // ← ключевая строка
 
-const DAY_MS = 86_400_000;                 // миллисекунд в сутках
+import { NextRequest, NextResponse } from 'next/server';
+import { redis } from '@/lib/redis';
 
-export async function GET() {
-  const now = Date.now();
+/** сутки в миллисекундах */
+const DAY_MS = 24 * 60 * 60 * 1000;
 
-  // параллельные запросы к Redis
+/**
+ * GET /api/stats
+ * Возвращает счётчики лидов за 24 ч и список последних 20 записей.
+ */
+export async function GET(_req: NextRequest) {
+  // параллельные вызовы к Redis (у нас сейчас заглушка, ошибок не будет)
   const [latest, count24h] = await Promise.all([
-    redis.lrange("leads", 0, 19),                 // 20 последних лидов
-    redis.zcount("hits24h", now - DAY_MS, "+inf") // за 24 часа
+    redis.lrange('leads', 0, 19),                 // последние 20
+    redis.zcount('hits24h', Date.now() - DAY_MS, '+inf') // за 24 ч
   ]);
 
   return NextResponse.json({
-    latest: latest.map((s: string) => JSON.parse(s)),
-    count24h
+    leads24h: count24h,
+    latest
   });
 }

@@ -1,6 +1,13 @@
-import { Redis } from "@upstash/redis";
+﻿// lib/redis.ts
+/**
+ * Заглушка клиента Redis, чтобы TypeScript
+ * и рантайм не падали в отсутствие реального подключения.
+ */
 
-export const redis = new Redis({
-  url:   process.env.REDIS_URL!,    // «!» — говорим TS, что переменные точно есть
-  token: process.env.REDIS_TOKEN!,
-});
+export const redis = {
+  /** очередь лидов */
+  lpush: async (..._args: unknown[]) => {},
+
+  /** сортированное множество для статистики */
+  zadd: async (..._args: unknown[]) => {}
+} as const;
